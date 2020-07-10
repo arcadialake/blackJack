@@ -86,6 +86,7 @@ def take_bet():
             if player_chips.bet > player_chips.total:
                 print(f"You can't bet more than you have dude, lower your bet. You currently have {player_chips.total} chips on the table")
                 continue
+
             else:
                 print("Like a boss!!")
                 return player_chips.bet
@@ -97,16 +98,17 @@ def hit(deck, hand):
 
 
 def hit_or_stand(deck, hand):
-    global playing
 
     while True:
         choice = str(input("hit or stand? Enter 'h' or 's' "))
         if choice[0].lower() == "h":
             hit(deck, hand)
             show_some(player_hand, dealer_hand)
+            if player_hand.value < 21:
+                continue
         elif choice[0].lower() == "s":
             print("\n"+"You stand, Dealer's turn \n")
-            playing = False
+            return choice
 
         else:
             print("Dude, enter hit or stand only!")
@@ -144,16 +146,14 @@ def show_all(player, dealer):
 def player_busts(player, dealer, chips):
     print("YOU BUST! DEALER WINS!!")
     print("\n")
-    show_all(player_hand, dealer_hand)
     chips.lose_bet()
     print("\n")
     print(f"You have {chips.total} chips remaining ")
 
 
 def player_wins(player, dealer, chips):
-    print("YOU WIN!!")
-    print("\n")
     show_all(player_hand, dealer_hand)
+    print("YOU WIN!!")
     chips.win_bet()
     print("\n")
     print(f"You have {chips.total} chips remaining ")
@@ -161,16 +161,16 @@ def player_wins(player, dealer, chips):
 
 def dealer_busts(player, dealer, chips):
     print("DEALER BUSTS! YOU WIN!! ")
-    print("\n")
-    show_all(player_hand, dealer_hand)
     chips.win_bet()
-    print("\n")
     print(f"You have {chips.total} chips remaining ")
 
 
 def dealer_wins(player, dealer, chips):
     print("DEALER WINS!! ")
     print("\n")
+    show_all(player_hand, dealer_hand)
+    chips.lose_bet()
+    print('\n')
     print(f"You have {chips.total} chips remaining")
 
 
@@ -186,16 +186,16 @@ def replay():
         print("Thank you for playing")
         return False
 
+print("You have stepped into a casino and sat down at a Blackjack table. You give the dealer two thumbs up and a stupid smile. It's on...\n")
+time.sleep(6)
+print("The dealer shuffles the cards and deals, you raise an eyebrow, letting him know that you like to live dangerously. \n")
+time.sleep(5)
+player_chips = Chips()
 
 while True:
 
-    print("You have stepped into a casino and sat down at a Blackjack table. You give the dealer two thumbs up and a stupid smile. It's on...\n")
-    time.sleep(6)
-
     the_deck = Deck()
     the_deck.shuffle()
-    print("The dealer shuffles the cards and deals, you raise an eyebrow, letting him know that you like to live dangerously. \n")
-    time.sleep(5)
     player_hand = Hand()
     dealer_hand = Hand()
     player_hand.add_card(the_deck.deal())
@@ -206,7 +206,6 @@ while True:
     dealer_hand.adjust_for_ace()
     show_some(player_hand, dealer_hand)
 
-    player_chips = Chips()
     print(f"You have {player_chips.total} chips on the table. \n")
     time.sleep(3)
 
@@ -222,11 +221,11 @@ while True:
             playing = False
             break
 
-    while dealer_hand.value < 17:
-        time.sleep(3)
-        hit(the_deck, dealer_hand)
-        print("Dealer hits \n")
-        show_some(player_hand, dealer_hand)
+        while dealer_hand.value < 17:
+            time.sleep(3)
+            hit(the_deck, dealer_hand)
+            print("Dealer hits \n")
+            show_all(player_hand, dealer_hand)
 
         if dealer_hand.value > 21:
             dealer_busts(player_hand, dealer_hand, player_chips)
@@ -237,30 +236,20 @@ while True:
         elif player_hand.value and dealer_hand.value == 21:
             push(player_hand, dealer_hand, player_chips)
 
-            break
+        break
 
     if not replay():
         playing = False
         break
 
     else:
+        if player_chips.total == 0:
+            print('You are out of chips!')
+            more_chips = input('Would you like another 1000? Y/N? ')
+            if more_chips.lower() == 'y':
+                player_chips = Chips()
+            else:
+                print("You can't play without money, BYE!")
+                break
         playing = True
         continue
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
